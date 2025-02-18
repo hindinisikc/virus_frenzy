@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const mapSize = 2000;
+let mapSize = 1000;
 let zoomLevel = 1;
 
 function getColors() {
@@ -28,7 +28,7 @@ const player = {
 };
 
 function updateZoom() {
-    zoomLevel = Math.max(1, 1 + (player.radius - 30) / 100);
+    zoomLevel = 1 - Math.min(0.4, (player.radius - 30) / 300);
 }
 
 const enemies = [];
@@ -53,7 +53,7 @@ function spawnEnemies() {
             x: enemyX,
             y: enemyY,
             radius: enemyRadius,
-            baseSpeed: 10 + Math.random(),
+            baseSpeed: 4 + Math.random(),
             get speed() {
                 return this.baseSpeed / (this.radius / 10);
             }
@@ -64,13 +64,16 @@ function spawnEnemies() {
 spawnEnemies();
 
 const foods = [];
-for (let i = 0; i < 50; i++) {
-    foods.push({
-        x: Math.random() * mapSize,
-        y: Math.random() * mapSize,
-        radius: 5
-    });
+function spawnFoods() {
+    for (let i = 0; i < 50; i++) {
+        foods.push({
+            x: Math.random() * mapSize,
+            y: Math.random() * mapSize,
+            radius: 5
+        });
+    }
 }
+spawnFoods();
 
 let mouseX = canvas.width / 2;
 let mouseY = canvas.height / 2;
@@ -94,7 +97,6 @@ function moveEnemies() {
             enemy.y += (dy / distance) * enemy.speed;
         }
 
-        // Prevent enemies from leaving map boundaries
         enemy.x = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.x));
         enemy.y = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.y));
     }
@@ -125,24 +127,37 @@ function checkCollisions() {
         }
     }
 
-    if (enemies.length === 0) {
-        round++;
-        spawnEnemies();
+    if (enemies.length === 0 && !nextRoundTriggered) {
+        nextRoundTriggered = true;
+        setTimeout(startNewRound, 500);
     }
 }
 
-function drawGrid() {
-    const gridSize = 50;
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
-    ctx.lineWidth = 1;
+let nextRoundTriggered = false;
+function startNewRound() {
+    round++;
+    mapSize += 500;
+    player.x = mapSize / 2;
+    player.y = mapSize / 2;
+    updateZoom();
 
+    enemies.length = 0;
+    foods.length = 0;
+
+    spawnEnemies();
+    spawnFoods();
+    nextRoundTriggered = false;
+}
+
+function drawGrid() {
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    const gridSize = 50;
     for (let x = 0; x < mapSize; x += gridSize) {
         ctx.beginPath();
         ctx.moveTo(x, 0);
         ctx.lineTo(x, mapSize);
         ctx.stroke();
     }
-
     for (let y = 0; y < mapSize; y += gridSize) {
         ctx.beginPath();
         ctx.moveTo(0, y);
@@ -150,6 +165,7 @@ function drawGrid() {
         ctx.stroke();
     }
 }
+
 
 function update() {
     const dx = mouseX - canvas.width / 2;
@@ -161,7 +177,6 @@ function update() {
         player.y += (dy / distance) * player.speed;
     }
 
-    // Prevent player from leaving map boundaries
     player.x = Math.max(player.radius, Math.min(mapSize - player.radius, player.x));
     player.y = Math.max(player.radius, Math.min(mapSize - player.radius, player.y));
 
@@ -175,32 +190,29 @@ function draw() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx.save();
-    ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
+    ctx.translate(canvas.width / 2 - player.x * zoomLevel, canvas.height / 2 - player.y * zoomLevel);
+    ctx.scale(zoomLevel, zoomLevel);
     drawGrid();
 
-    for (const food of foods) {
+    foods.forEach(food => {
+        ctx.fillStyle = getColors().foodColor;
         ctx.beginPath();
         ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
-        ctx.fillStyle = getColors().foodColor;
         ctx.fill();
-    }
+    });
 
-    for (const enemy of enemies) {
+    enemies.forEach(enemy => {
+        ctx.fillStyle = getColors().enemyColor;
         ctx.beginPath();
         ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
-        ctx.fillStyle = getColors().enemyColor;
         ctx.fill();
-    }
+    });
 
+    ctx.fillStyle = getColors().playerColor;
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-    ctx.fillStyle = getColors().playerColor;
     ctx.fill();
-
     ctx.restore();
-    ctx.fillStyle = "white";
-    ctx.font = "20px Arial";
-    ctx.fillText(`Round: ${round}`, 20, 40);
 }
 
 function gameLoop() {
