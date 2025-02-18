@@ -4,7 +4,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const mapSize = 1000;
+const mapSize = 2000;
 let zoomLevel = 1;
 
 function getColors() {
@@ -32,8 +32,8 @@ function updateZoom() {
 }
 
 const enemies = [];
-const enemyBatchSize = 10; // Spawn 50 enemies per round
-const minSpawnDistance = 500; // Minimum distance from the player
+const enemyBatchSize = 10;
+const minSpawnDistance = 500;
 let round = 1;
 
 function spawnEnemies() {
@@ -46,7 +46,6 @@ function spawnEnemies() {
             distance = Math.sqrt((enemyX - player.x) ** 2 + (enemyY - player.y) ** 2);
         } while (distance < minSpawnDistance); 
 
-        // Enemy size is slightly larger or smaller than player
         const sizeVariation = (Math.random() < 0.5 ? -1 : 1) * (Math.random() * 10);
         const enemyRadius = Math.max(10, player.radius + sizeVariation);
 
@@ -54,7 +53,7 @@ function spawnEnemies() {
             x: enemyX,
             y: enemyY,
             radius: enemyRadius,
-            baseSpeed: 4 + Math.random(),
+            baseSpeed: 10 + Math.random(),
             get speed() {
                 return this.baseSpeed / (this.radius / 10);
             }
@@ -62,7 +61,6 @@ function spawnEnemies() {
     }
 }
 
-// Spawn initial enemies
 spawnEnemies();
 
 const foods = [];
@@ -95,6 +93,10 @@ function moveEnemies() {
             enemy.x += (dx / distance) * enemy.speed;
             enemy.y += (dy / distance) * enemy.speed;
         }
+
+        // Prevent enemies from leaving map boundaries
+        enemy.x = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.x));
+        enemy.y = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.y));
     }
 }
 
@@ -123,10 +125,29 @@ function checkCollisions() {
         }
     }
 
-    // If all enemies are gone, start a new round
     if (enemies.length === 0) {
         round++;
         spawnEnemies();
+    }
+}
+
+function drawGrid() {
+    const gridSize = 50;
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.lineWidth = 1;
+
+    for (let x = 0; x < mapSize; x += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, mapSize);
+        ctx.stroke();
+    }
+
+    for (let y = 0; y < mapSize; y += gridSize) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(mapSize, y);
+        ctx.stroke();
     }
 }
 
@@ -140,6 +161,10 @@ function update() {
         player.y += (dy / distance) * player.speed;
     }
 
+    // Prevent player from leaving map boundaries
+    player.x = Math.max(player.radius, Math.min(mapSize - player.radius, player.x));
+    player.y = Math.max(player.radius, Math.min(mapSize - player.radius, player.y));
+
     moveEnemies();
     checkCollisions();
 }
@@ -149,18 +174,15 @@ function draw() {
     ctx.fillStyle = getColors().backgroundColor;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    const offsetX = canvas.width / 2 - player.x;
-    const offsetY = canvas.height / 2 - player.y;
-
     ctx.save();
-    ctx.translate(offsetX, offsetY);
+    ctx.translate(canvas.width / 2 - player.x, canvas.height / 2 - player.y);
+    drawGrid();
 
     for (const food of foods) {
         ctx.beginPath();
         ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
         ctx.fillStyle = getColors().foodColor;
         ctx.fill();
-        ctx.closePath();
     }
 
     for (const enemy of enemies) {
@@ -168,18 +190,14 @@ function draw() {
         ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
         ctx.fillStyle = getColors().enemyColor;
         ctx.fill();
-        ctx.closePath();
     }
 
     ctx.beginPath();
     ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
     ctx.fillStyle = getColors().playerColor;
     ctx.fill();
-    ctx.closePath();
 
     ctx.restore();
-
-    // Display round number
     ctx.fillStyle = "white";
     ctx.font = "20px Arial";
     ctx.fillText(`Round: ${round}`, 20, 40);
