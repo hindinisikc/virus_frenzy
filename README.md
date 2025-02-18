@@ -3,7 +3,7 @@
 
 // study //
 
-getColors()
+# getColors()
 
 
     function getColors() {
@@ -22,7 +22,7 @@ If the values aren't set, it falls back to default colors. It returns an object 
 
 
 
-spawnEnemies()
+# spawnEnemies()
 
     function spawnEnemies() {
         for (let i = 0; i < enemyBatchSize; i++) {
@@ -54,7 +54,7 @@ It ensures that the enemies are not spawned too close to the player by checking 
 Each enemy gets a random radius and speed, with a size variation based on the player's size.
 
 
-    spawnFoods()
+# spawnFoods()
     
     function spawnFoods() {
         for (let i = 0; i < 50; i++) {
@@ -71,7 +71,7 @@ These food items are later consumed by the player to increase their size.
 
 
 
-moveEnemies()
+# moveEnemies()
 
     function moveEnemies() {
         for (let enemy of enemies) {
@@ -96,7 +96,7 @@ This function moves each enemy towards or away from the player, depending on the
 If the player is smaller, they move towards the player. The enemies are also constrained within the map boundaries.
 
 
-    checkCollisions()
+# checkCollisions()
     
     function checkCollisions() {
         for (let i = foods.length - 1; i >= 0; i--) {
@@ -139,7 +139,7 @@ If the player collides with an enemy smaller than them, the enemy is eaten, and 
 If the player collides with a larger enemy, the game ends.
 If all enemies are eaten, the next round begins.
 
-startNewRound()
+# startNewRound()
 
     function startNewRound() {
         round++;
@@ -165,7 +165,7 @@ Enemies and food are respawned.
 The zoom level is updated.
 
 
-drawGrid()
+# drawGrid()
 
     function drawGrid() {
         ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
@@ -190,7 +190,7 @@ This function draws a grid on the map for visual reference, making the world loo
 
 
 
-update()
+# update()
 
     function update() {
         const dx = mouseX - canvas.width / 2;
@@ -213,7 +213,7 @@ This function updates the player's position based on the mouse movement. It calc
 
 
 
-draw()
+# draw()
 
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -254,7 +254,7 @@ Translates the canvas based on the player's position and applies zoom.
 Draws the grid, foods, enemies, and player.
 
 
-gameLoop()
+# gameLoop()
 
     
     function gameLoop() {
@@ -272,35 +272,35 @@ This function is the main game loop. It calls the update() and draw() functions 
 
 Here are the descriptions for the methods in your code, outlining how each one works:
 
-getComputedStyle()
+# getComputedStyle()
 
     getComputedStyle(document.documentElement);
 
 Description:
 This method is used to retrieve the computed styles of the root element (document.documentElement), which includes the values of CSS properties defined in the style sheets. In this case, it is used to retrieve the colors for player, enemy, food, and background from the CSS variables.
 
-Math.random()
+# Math.random()
 
     Math.random() * mapSize;
 
 Description:
 This method generates a random floating-point number between 0 (inclusive) and 1 (exclusive). It is used to generate random positions for the enemies and food on the map by scaling it to the mapSize.
 
-Math.sqrt()
+# Math.sqrt()
 
     Math.sqrt((enemyX - player.x) ** 2 + (enemyY - player.y) ** 2);
 
 Description:
 This method calculates the square root of a number. It is used to calculate the Euclidean distance between two points on the map (such as the distance between the player and an enemy, or the player and food) by using the Pythagorean theorem.
 
-Math.max()
+# Math.max()
 
     Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.x));
 
 Description:
 This method returns the largest of the provided numbers. In this case, it is used to constrain the enemy's position within the boundaries of the map. It ensures that the enemy does not go beyond the edges of the map, accounting for the radius of the enemy.
 
-Math.min()
+# Math.min()
 
     Math.min(mapSize - enemy.radius, enemy.x);
 
@@ -314,21 +314,21 @@ This method returns the smallest of the provided numbers. It is used alongside M
 Description:
 The splice() method changes the contents of an array by removing or replacing existing elements and/or adding new elements in place. In this case, it is used to remove food or enemy objects from their respective arrays when they are eaten or destroyed.
 
-alert()
+# alert()
     
     alert("Game Over! You got eaten.");
 
 Description:
 The alert() method displays an alert dialog box with a specified message. It is used here to notify the player when the game ends (i.e., when the player is eaten by a larger enemy).
 
-location.reload()
+# location.reload()
 
     location.reload();
 
 Description:
 This method reloads the current document (restarts the game). It is called when the game is over, resetting the game state.
 
-setTimeout()
+# setTimeout()
 
     setTimeout(startNewRound, 500);
 
@@ -342,42 +342,42 @@ ctx.beginPath()
 Description:
 This method begins a new path for drawing on the canvas. It is used before any drawing operations (e.g., arc(), moveTo(), lineTo()) to ensure the path starts fresh for each object being drawn.
 
-ctx.arc()
+# ctx.arc()
 
     ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
 
 Description:
 The arc() method creates an arc/curve that can be used to draw circles and circular shapes. It takes parameters such as the center (food.x, food.y), radius (food.radius), and the start and end angles of the arc (in radians). Here, it is used to draw the food, enemies, and player as circles.
 
-ctx.fill()
+# ctx.fill()
 
     ctx.fill();
 
 Description:
 The fill() method fills the current path with the current fillStyle (the color or pattern used to fill the shapes). It is used here to fill the player, food, and enemy shapes with the appropriate colors.
 
-ctx.stroke()
+# ctx.stroke()
 
     ctx.stroke();
 
 Description:
 The stroke() method actually draws the path that has been defined but not filled. It is used in conjunction with beginPath() and moveTo()/lineTo() to draw the grid lines.
 
-ctx.save()
+# ctx.save()
 
     ctx.save();
 
 Description:
 The save() method saves the current state of the canvas, including transformations, styles, and clipping regions. It is used to save the state before applying any transformations, and later restore() is called to revert to the previous state.
 
-ctx.restore()
+# ctx.restore()
 
     ctx.restore();
 
 Description:
 The restore() method restores the canvas to the state saved by save(). It is used to undo any transformations or changes to the canvas state, ensuring that the transformations applied to draw the player, enemies, and food do not affect other elements like the grid.
 
-requestAnimationFrame()
+# requestAnimationFrame()
 
     requestAnimationFrame(gameLoop);
     
