@@ -215,23 +215,30 @@ function drawGrid() {
 }
 
 // Function to show card selection
-// Function to show card selection
 function showCardSelection() {
-    const cardContainer = document.getElementById('cardContainer');
-    cardContainer.style.display = 'flex';
+    const cardContainer = document.getElementById("cardContainer");
+    const speedCard = document.querySelector("#speed-Card button");
+    const unstoppableCard = document.querySelector("#super-Card button"); 
 
-    const speedCard = document.getElementById('speedCard');
-    const skillCard = document.getElementById('skillCard');
+    if (!cardContainer || !speedCard || !unstoppableCard) {
+        console.error("Card container or buttons not found!");
+        return;
+    }
 
-    speedCard.addEventListener('click', () => {
+    // Show the card selection
+    cardContainer.style.display = "flex";
+
+    // Handle speed card click
+    speedCard.onclick = function () {
         player.baseSpeed += 6; // Increase player speed
-        cardContainer.style.display = 'none'; // Hide card selection
-    });
+        cardContainer.style.display = "none"; // Hide selection
+    };
 
-    skillCard.addEventListener('click', () => {
+    // Handle unstoppable card click
+    unstoppableCard.onclick = function () {
         activateSkill(); // Activate skill
-        cardContainer.style.display = 'none'; // Hide card selection
-    });
+        cardContainer.style.display = "none"; // Hide selection
+    };
 }
 
 // Function to activate the temporary skill
