@@ -1,6 +1,7 @@
 :root {
     --player-color: rgb(227, 232, 240);
     --enemy-color: rgb(204, 79, 99);
+    --large-enemy-color: rgb(169, 61, 202);
     --food-color: rgb(79, 185, 114);
     --background-color: rgb(56, 63, 60);
 }

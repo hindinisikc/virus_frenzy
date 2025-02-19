@@ -15,6 +15,7 @@ function getColors() {
     return {
         playerColor: rootStyles.getPropertyValue("--player-color").trim() || "rgb(255, 255, 255)",
         enemyColor: rootStyles.getPropertyValue("--enemy-color").trim() || "rgb(0, 255, 0)",
+        largeEnemyColor: rootStyles.getPropertyValue("--large-enemy-color").trim() || "rgb(255, 0, 0)",
         foodColor: rootStyles.getPropertyValue("--food-color").trim() || "rgb(255, 255, 255)",
         backgroundColor: rootStyles.getPropertyValue("--background-color").trim() || "rgb(0, 0, 0)"
     };
@@ -33,7 +34,7 @@ const player = {
 
 // Update zoom level based on player's radius
 function updateZoom() {
-    zoomLevel = 1 - Math.min(0.4, (player.radius - 30) / 300); // Zoom decreases as player grows
+    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 150); // Zoom decreases as player grows
 }
 
 // Enemies array and related constants
@@ -52,7 +53,7 @@ function spawnEnemies() {
             enemyX = Math.random() * mapSize;
             enemyY = Math.random() * mapSize;
             distance = Math.sqrt((enemyX - player.x) ** 2 + (enemyY - player.y) ** 2);
-        } while (distance < minSpawnDistance); 
+        } while (distance < minSpawnDistance + player.radius);
 
         // Add variation to enemy size and calculate speed based on radius
         const sizeVariation = (Math.random() < 0.5 ? -1 : 1) * (Math.random() * 10);
@@ -64,7 +65,7 @@ function spawnEnemies() {
             radius: enemyRadius,
             baseSpeed: 4 + Math.random(),  // Random speed for each enemy
             get speed() { // Speed is inversely proportional to size
-                return this.baseSpeed / (this.radius / 10);
+                return this.baseSpeed / (this.radius / 30);
             }
         });
     }
@@ -138,14 +139,16 @@ function checkCollisions() {
         const dist = Math.sqrt((enemy.x - player.x) ** 2 + (enemy.y - player.y) ** 2);
 
         // Player eats the enemy if it collides with a smaller enemy
-        if (dist < player.radius - 5) {
-            enemies.splice(i, 1);  // Remove enemy
-            player.radius += 5;    // Increase player size
-            updateZoom();          // Update zoom
-        } else if (dist < enemy.radius - 5) {
-            // Player gets eaten by a larger enemy
-            alert("Game Over! You got eaten.");
-            location.reload();    // Reload the game on game over
+        if (dist < player.radius + enemy.radius) {
+            if (player.radius > enemy.radius) {
+                enemies.splice(i, 1); // Remove enemy
+                player.radius += 5; // Increase player size
+                updateZoom(); // Update zoom based on new size
+            } else {
+                // Game over if player collides with a larger enemy
+                alert(`Game Over! You survived ${round} rounds.`);
+                location.reload(); // Reload the game
+            }
         }
     }
 
@@ -234,7 +237,7 @@ function draw() {
 
     // Draw enemies
     enemies.forEach(enemy => {
-        ctx.fillStyle = getColors().enemyColor;
+        ctx.fillStyle = player.radius < enemy.radius ? getColors().largeEnemyColor : getColors().enemyColor;
         ctx.beginPath();
         ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
         ctx.fill();
@@ -257,15 +260,3 @@ function gameLoop() {
 
 // Start the game loop
 gameLoop();
-
-
-
-
-
-
-
-
-
-
-
-
