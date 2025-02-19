@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let mapSize = 1000; // Size of the game map
+let mapSize = 1500; // Size of the game map
 let zoomLevel = 1;  // Initial zoom level
 
 // Function to retrieve color values from CSS variables
@@ -34,7 +34,7 @@ const player = {
 
 // Update zoom level based on player's radius
 function updateZoom() {
-    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 150); // Zoom decreases as player grows
+    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 200); // Zoom decreases as player grows
 }
 
 // Enemies array and related constants
@@ -53,7 +53,7 @@ function spawnEnemies() {
             enemyX = Math.random() * mapSize;
             enemyY = Math.random() * mapSize;
             distance = Math.sqrt((enemyX - player.x) ** 2 + (enemyY - player.y) ** 2);
-        } while (distance < minSpawnDistance + player.radius);
+        } while (distance < minSpawnDistance + player.radius + 200);
 
         // Add variation to enemy size and calculate speed based on radius
         const sizeVariation = (Math.random() < 0.5 ? -1 : 1) * (Math.random() * 10);
