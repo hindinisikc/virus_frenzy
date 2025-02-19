@@ -4,6 +4,7 @@
     --large-enemy-color: rgb(169, 61, 202);
     --food-color: rgb(79, 185, 114);
     --background-color: rgb(56, 63, 60);
+    --obstacle-color: rgb(126, 162, 184);
 }
 
 /* Set the background color for the entire game */

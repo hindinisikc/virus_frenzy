@@ -6,7 +6,7 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-let mapSize = 1500; // Size of the game map
+let mapSize = 2000; // Size of the game map
 let zoomLevel = 1;  // Initial zoom level
 
 // Function to retrieve color values from CSS variables
@@ -17,7 +17,8 @@ function getColors() {
         enemyColor: rootStyles.getPropertyValue("--enemy-color").trim() || "rgb(0, 255, 0)",
         largeEnemyColor: rootStyles.getPropertyValue("--large-enemy-color").trim() || "rgb(255, 0, 0)",
         foodColor: rootStyles.getPropertyValue("--food-color").trim() || "rgb(255, 255, 255)",
-        backgroundColor: rootStyles.getPropertyValue("--background-color").trim() || "rgb(0, 0, 0)"
+        backgroundColor: rootStyles.getPropertyValue("--background-color").trim() || "rgb(0, 0, 0)",
+        
     };
 }
 
@@ -34,17 +35,23 @@ const player = {
 
 // Update zoom level based on player's radius
 function updateZoom() {
-    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 200); // Zoom decreases as player grows
+    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 300); // Zoom decreases as player grows
+}
+
+// Function to calculate minimum spawn distance based on map size
+function getMinSpawnDistance() {
+    return mapSize / 4; // Example: enemies spawn at least 1/4th of the map size away from the player
 }
 
 // Enemies array and related constants
 const enemies = [];
-const enemyBatchSize = 10;  // Number of enemies to spawn in one batch
-const minSpawnDistance = 500; // Minimum distance from player to spawn an enemy
+const enemyBatchSize = 20;  // Number of enemies to spawn in one batch
+// const minSpawnDistance = 500; // Minimum distance from player to spawn an enemy
 let round = 1;  // Round counter
 
 // Function to spawn enemies at random positions
 function spawnEnemies() {
+    const minSpawnDistance = getMinSpawnDistance();
     for (let i = 0; i < enemyBatchSize; i++) {
         let enemyX, enemyY, distance;
 
@@ -53,20 +60,17 @@ function spawnEnemies() {
             enemyX = Math.random() * mapSize;
             enemyY = Math.random() * mapSize;
             distance = Math.sqrt((enemyX - player.x) ** 2 + (enemyY - player.y) ** 2);
-        } while (distance < minSpawnDistance + player.radius + 200);
+        } while (distance < minSpawnDistance + player.radius + 500);
 
         // Add variation to enemy size and calculate speed based on radius
-        const sizeVariation = (Math.random() < 0.5 ? -1 : 1) * (Math.random() * 10);
+        const sizeVariation = (Math.random() < 0.5 ? 1 : 1) * (Math.random() * 10);
         const enemyRadius = Math.max(10, player.radius + sizeVariation);
 
         enemies.push({
             x: enemyX,
             y: enemyY,
             radius: enemyRadius,
-            baseSpeed: 4 + Math.random(),  // Random speed for each enemy
-            get speed() { // Speed is inversely proportional to size
-                return this.baseSpeed / (this.radius / 30);
-            }
+            speed: 4 + Math.random()
         });
     }
 }
@@ -88,14 +92,16 @@ function spawnFoods() {
 // Spawn initial foods
 spawnFoods();
 
-// Mouse position for player movement targeting
-let mouseX = canvas.width / 2;
-let mouseY = canvas.height / 2;
+// Track which keys are pressed
+const keysPressed = {};
 
-// Update mouse position on mousemove
-canvas.addEventListener("mousemove", (event) => {
-    mouseX = event.clientX;
-    mouseY = event.clientY;
+// Update key press status on keydown and keyup
+window.addEventListener("keydown", (event) => {
+    keysPressed[event.key] = true;
+});
+
+window.addEventListener("keyup", (event) => {
+    keysPressed[event.key] = false;
 });
 
 // Function to move enemies towards the player
@@ -117,8 +123,13 @@ function moveEnemies() {
         // Prevent enemies from going out of bounds
         enemy.x = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.x));
         enemy.y = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.y));
+
+        
     }
 }
+
+
+
 
 // Function to check for collisions between the player, food, and enemies
 function checkCollisions() {
@@ -157,6 +168,8 @@ function checkCollisions() {
         nextRoundTriggered = true;
         setTimeout(startNewRound, 500);  // Delay before starting the new round
     }
+
+    
 }
 
 // Flag to trigger the start of a new round
@@ -164,7 +177,7 @@ let nextRoundTriggered = false;
 // Function to start a new round
 function startNewRound() {
     round++;
-    mapSize += 500;  // Increase map size for the next round
+    mapSize += 3000;  // Increase map size for the next round
     player.x = mapSize / 2;  // Recenter player
     player.y = mapSize / 2;
     updateZoom();  // Update zoom
@@ -198,14 +211,18 @@ function drawGrid() {
 
 // Update the player and enemy movements
 function update() {
-    const dx = mouseX - canvas.width / 2;
-    const dy = mouseY - canvas.height / 2;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-
-    // Move the player towards the mouse cursor
-    if (distance > player.speed) {
-        player.x += (dx / distance) * player.speed;
-        player.y += (dy / distance) * player.speed;
+    // Move the player based on keys pressed
+    if (keysPressed['w'] || keysPressed['W']) {
+        player.y -= player.speed;
+    }
+    if (keysPressed['a'] || keysPressed['A']) {
+        player.x -= player.speed;
+    }
+    if (keysPressed['s'] || keysPressed['S']) {
+        player.y += player.speed;
+    }
+    if (keysPressed['d'] || keysPressed['D']) {
+        player.x += player.speed;
     }
 
     // Prevent player from going out of bounds
@@ -234,6 +251,7 @@ function draw() {
         ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
         ctx.fill();
     });
+
 
     // Draw enemies
     enemies.forEach(enemy => {
