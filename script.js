@@ -9,6 +9,9 @@ canvas.height = window.innerHeight;
 let mapSize = 2000; // Size of the game map
 let zoomLevel = 1;  // Initial zoom level
 
+let skillActive = false; // Flag to check if skill is active
+let skillCooldown = false; // Flag to check if skill is on cooldown
+
 // Function to retrieve color values from CSS variables
 function getColors() {
     const rootStyles = getComputedStyle(document.documentElement);
@@ -112,7 +115,7 @@ function moveEnemies() {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         // Enemies move towards the player based on relative size
-        if (player.radius > enemy.radius) {
+        if (player.radius > enemy.radius || skillActive) {
             enemy.x -= (dx / distance) * enemy.speed;
             enemy.y -= (dy / distance) * enemy.speed;
         } else if (player.radius < enemy.radius) {
@@ -123,8 +126,6 @@ function moveEnemies() {
         // Prevent enemies from going out of bounds
         enemy.x = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.x));
         enemy.y = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.y));
-
-        
     }
 }
 
@@ -151,7 +152,7 @@ function checkCollisions() {
 
         // Player eats the enemy if it collides with a smaller enemy
         if (dist < player.radius + enemy.radius) {
-            if (player.radius > enemy.radius) {
+            if (player.radius > enemy.radius || skillActive) {
                 enemies.splice(i, 1); // Remove enemy
                 player.radius += 5; // Increase player size
                 updateZoom(); // Update zoom based on new size
@@ -174,6 +175,7 @@ function checkCollisions() {
 
 // Flag to trigger the start of a new round
 let nextRoundTriggered = false;
+
 // Function to start a new round
 function startNewRound() {
     round++;
@@ -189,6 +191,9 @@ function startNewRound() {
     spawnEnemies();  // Spawn new enemies
     spawnFoods();    // Spawn new food
     nextRoundTriggered = false;
+
+    // Show card selection
+    showCardSelection();
 }
 
 // Function to draw the grid on the canvas
@@ -206,6 +211,56 @@ function drawGrid() {
         ctx.moveTo(0, y);
         ctx.lineTo(mapSize, y);
         ctx.stroke();
+    }
+}
+
+// Function to show card selection
+// Function to show card selection
+function showCardSelection() {
+    const cardContainer = document.getElementById('cardContainer');
+    cardContainer.style.display = 'flex';
+
+    const speedCard = document.getElementById('speedCard');
+    const skillCard = document.getElementById('skillCard');
+
+    speedCard.addEventListener('click', () => {
+        player.baseSpeed += 6; // Increase player speed
+        cardContainer.style.display = 'none'; // Hide card selection
+    });
+
+    skillCard.addEventListener('click', () => {
+        activateSkill(); // Activate skill
+        cardContainer.style.display = 'none'; // Hide card selection
+    });
+}
+
+// Function to activate the temporary skill
+function activateSkill() {
+    if (!skillCooldown) {
+        skillActive = true;
+        setTimeout(() => {
+            skillActive = false;
+            skillCooldown = true;
+            setTimeout(() => {
+                skillCooldown = false;
+            }, 10000); // 10 seconds cooldown
+        }, 5000); // 5 seconds active
+    }
+}
+
+
+
+// Function to activate the temporary skill
+function activateSkill() {
+    if (!skillCooldown) {
+        skillActive = true;
+        setTimeout(() => {
+            skillActive = false;
+            skillCooldown = true;
+            setTimeout(() => {
+                skillCooldown = false;
+            }, 10000); // 10 seconds cooldown
+        }, 5000); // 5 seconds active
     }
 }
 
