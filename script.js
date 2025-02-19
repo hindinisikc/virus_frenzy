@@ -73,7 +73,7 @@ function spawnEnemies() {
             x: enemyX,
             y: enemyY,
             radius: enemyRadius,
-            speed: 4 + Math.random()
+            speed: 3 + Math.random()
         });
     }
 }
@@ -251,25 +251,12 @@ function activateSkill() {
             setTimeout(() => {
                 skillCooldown = false;
             }, 10000); // 10 seconds cooldown
-        }, 5000); // 5 seconds active
+        }, 10000); // 10 seconds active
     }
 }
 
 
 
-// Function to activate the temporary skill
-function activateSkill() {
-    if (!skillCooldown) {
-        skillActive = true;
-        setTimeout(() => {
-            skillActive = false;
-            skillCooldown = true;
-            setTimeout(() => {
-                skillCooldown = false;
-            }, 10000); // 10 seconds cooldown
-        }, 5000); // 5 seconds active
-    }
-}
 
 // Update the player and enemy movements
 function update() {
