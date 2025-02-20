@@ -12,6 +12,10 @@ let zoomLevel = 1;  // Initial zoom level
 let skillActive = false; // Flag to check if skill is active
 let skillCooldown = false; // Flag to check if skill is on cooldown
 
+
+let score = 0;
+const scoreElement = document.getElementById("score");
+
 // Function to retrieve color values from CSS variables
 function getColors() {
     const rootStyles = getComputedStyle(document.documentElement);
@@ -129,7 +133,14 @@ function moveEnemies() {
     }
 }
 
+function increaseScore(amount) {
+    score += amount;
+    scoreElement.textContent = score;
+}
 
+function onEnemyEaten() {
+    increaseScore(10);
+}
 
 
 // Function to check for collisions between the player, food, and enemies
@@ -141,6 +152,7 @@ function checkCollisions() {
         if (dist < player.radius) {
             foods.splice(i, 1); // Remove food item
             player.radius += 1; // Increase player size
+            increaseScore(1);
             updateZoom(); // Update zoom based on new size
         }
     }
@@ -155,6 +167,7 @@ function checkCollisions() {
             if (player.radius > enemy.radius || skillActive) {
                 enemies.splice(i, 1); // Remove enemy
                 player.radius += 5; // Increase player size
+                increaseScore(10);
                 updateZoom(); // Update zoom based on new size
             } else {
                 // Game over if player collides with a larger enemy
@@ -172,6 +185,8 @@ function checkCollisions() {
 
     
 }
+
+
 
 // Flag to trigger the start of a new round
 let nextRoundTriggered = false;

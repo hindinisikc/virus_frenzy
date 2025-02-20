@@ -7,6 +7,10 @@
     --obstacle-color: rgb(126, 162, 184);
 }
 
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 /* Set the background color for the entire game */
 body {
     margin: 0;
@@ -105,4 +109,18 @@ button:hover {
     background: rgba(255, 255, 255, 0.733);
     box-shadow: 0 12px 16px rgba(255, 255, 255, 0.527), 0 17px 50px rgba(255, 255, 255, 0.19);
     transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+#score-container{
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 20px;
+    font-weight: bold;
+    color: rgb(235, 236, 243);
+    background-color: rgba(24, 25, 26, 0.192);
+    padding: 2%;
+    border-radius: 10px;
+    
+
 }
