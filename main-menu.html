@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Virus Frenzy</title>
+    <link rel="stylesheet" href="menu.css">
+    
+</head>
+<body>
+    <div class="menu-container">
+             
+        <svg viewBox="0 0 960 300">
+            <symbol id="s-text">
+              <text text-anchor="middle" x="50%" y="80%">VIRUS FRENZY</text>
+
+              
+            </symbol>
+          
+            <g class = "g-ants">
+              <use xlink:href="#s-text" class="text-copy"></use>
+              <use xlink:href="#s-text" class="text-copy"></use>
+              <use xlink:href="#s-text" class="text-copy"></use>
+              <use xlink:href="#s-text" class="text-copy"></use>
+              <use xlink:href="#s-text" class="text-copy"></use>
+            </g>
+          </svg>
+        <input type="text" id="playerName" placeholder="Username">
+        <button id="playButton">Play</button>
+    </div>
+
+    <script>
+        document.getElementById("playButton").addEventListener("click", function() {
+            let playerName = document.getElementById("playerName").value;
+            
+            if (playerName.trim() === "") {
+                alert("Please enter your name!");
+                return;
+            }
+
+            // Save name to local storage (optional)
+            localStorage.setItem("playerName", playerName);
+
+            // Redirect to game page (or start the game)
+            window.location.href = "index.html"; // Change this based on your setup
+        });
+    </script>
+
+    <script src="style.js"></script>
+</body>
+</html>

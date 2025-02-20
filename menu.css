@@ -1,0 +1,105 @@
+
+@import url(https://fonts.googleapis.com/css?family=Montserrat);
+
+html, body{
+  height: 100%;
+  font-weight: 800;
+}
+
+body{
+  background: yellow;
+  font-family: Arial;
+}
+
+svg {
+    display: block;
+    font: 7.5em 'Montserrat';
+    width: 960px;
+    height: 300px;
+    margin: 0 auto;
+}
+
+.text-copy {
+    fill: none;
+    stroke: white;
+    stroke-dasharray: 6% 29%;
+    stroke-width: 5px;
+    stroke-dashoffset: 0%;
+    animation: stroke-offset 5.5s infinite linear;
+}
+
+.text-copy:nth-child(1){
+  stroke: #eea9cf;
+  animation-delay: -1;
+}
+
+.text-copy:nth-child(2){
+  stroke: #c021a6;
+  animation-delay: -1.5s;
+}
+
+.text-copy:nth-child(3){
+  stroke: #972eb8;
+  animation-delay: -2s;
+}
+
+.text-copy:nth-child(4){
+  stroke: #80159b;
+  animation-delay: -2.5s;
+}
+
+.text-copy:nth-child(5){
+  stroke: #3e046d;
+  animation-delay: -s;
+}
+
+@keyframes stroke-offset{
+  100% {stroke-dashoffset: -35%;}
+}
+
+
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgb(12, 1, 26);
+}
+
+.menu-container {
+    text-align: center;
+    background: rgba(0, 0, 0, 0,7);
+    padding: 20px;
+    border-radius: 10px;
+    color: rgb(227, 232, 240);
+}
+
+input {
+    padding: 10px;
+    margin: 10px;
+    width: 80%;
+    border-radius: 10px;
+
+}
+
+button {
+    padding: 10px;
+    margin: 10px;
+    width: 80%;
+    background: rgb(53, 36, 153);
+    border: none;
+    color: rgb(227, 232, 240);
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+button:hover {
+    background: rgba(24, 197, 116, 0.733);
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.733), 0 17px 50px rgba(24, 197, 116, 0.733);
+    color: rgb(255, 255, 255);
+    transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+

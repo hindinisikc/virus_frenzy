@@ -1,3 +1,4 @@
+
 // Get the canvas element and its context for drawing
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
@@ -342,3 +343,8 @@ function gameLoop() {
 
 // Start the game loop
 gameLoop();
+
+
+
+
+
