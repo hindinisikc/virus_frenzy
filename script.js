@@ -214,7 +214,7 @@ function startNewRound() {
 
 // Function to draw the grid on the canvas
 function drawGrid() {
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+    ctx.strokeStyle = "rgba(235, 177, 235, 0.19)";
     const gridSize = 50;
     for (let x = 0; x < mapSize; x += gridSize) {
         ctx.beginPath();
