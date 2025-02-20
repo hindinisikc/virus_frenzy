@@ -30,11 +30,21 @@
     </div>
 
     <div id="score-container">
-        Player 1: <span id="score">0</span>
+
+        <span id="playerNameDisplay"></span>
+        <span id="score">0</span>
+        
     </div>
 
     
 
     <script src="script.js"></script>
+    <script>
+        // Retrieve and display the player's name
+        const playerName = localStorage.getItem("playerName");
+        if (playerName) {
+            document.getElementById("playerNameDisplay").textContent = `${playerName} : `;
+        }
+    </script>
 </body>
 </html>
