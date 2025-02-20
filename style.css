@@ -1,14 +1,16 @@
+@import url(https://fonts.googleapis.com/css?family=Montserrat);
+
 :root {
     --player-color: rgb(227, 232, 240);
     --enemy-color: rgb(204, 79, 99);
     --large-enemy-color: rgb(169, 61, 202);
-    --food-color: rgb(79, 185, 114);
-    --background-color: rgb(56, 63, 60);
+    --food-color: rgb(25, 214, 88);
+    --background-color: rgb(12, 1, 26);
     --obstacle-color: rgb(126, 162, 184);
 }
 
 * {
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: Arial;
 }
 
 /* Set the background color for the entire game */
@@ -117,8 +119,8 @@ button:hover {
     left: 10px;
     font-size: 20px;
     font-weight: bold;
-    color: rgb(235, 236, 243);
-    background-color: rgba(24, 25, 26, 0.192);
+    color: rgb(255, 191, 239);
+    background-color: rgba(3, 19, 36, 0);
     padding: 2%;
     border-radius: 10px;
     
