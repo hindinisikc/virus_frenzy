@@ -80,8 +80,20 @@ input {
     padding: 10px;
     margin: 10px;
     width: 80%;
-    border-radius: 10px;
+    border: none;
+    border-bottom: 2px solid rgb(41, 41, 56);
+    background-color: rgba(180, 153, 223, 0);
+    text-align: center;
+    color: rgb(208, 196, 214);
 
+}
+
+
+
+input:focus {
+    border: 2px solid (41, 41, 56);
+    background-color: rgb(41, 41, 56);
+    transition: 1.5s;
 }
 
 button {
