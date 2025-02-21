@@ -7,7 +7,7 @@ html, body{
 }
 
 body{
-  background: yellow;
+  background: rgb(168, 168, 46);
   font-family: Arial;
 }
 
@@ -65,7 +65,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgb(12, 1, 26);
+    background-image: linear-gradient(rgb(12, 1, 26), rgb(29, 2, 37), rgb(49, 3, 31));
+
 }
 
 .menu-container {
@@ -106,8 +107,8 @@ input:focus {
 
 button:hover {
     background: #972eb8;
-    box-shadow: 0 12px 16px rgba(0, 0, 0, 0.733), 0 17px 50px #c021a6;
-    color: rgb(255, 255, 255);
+    box-shadow: 0 12px 16px rgba(0, 0, 0, 0), 0 17px 50px #c021a6;
+    color: rgba(255, 255, 255, 0.459);
     transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
@@ -126,7 +127,7 @@ button:hover {
   border: none;
   border-radius: 30px;
   cursor: pointer;
-  background:rgba(146, 15, 151, 0.541);
+  background:rgba(146, 15, 151, 0.253);
   color: #ffc6ff;
   text-transform: uppercase;
   letter-spacing: 3px;
@@ -163,7 +164,7 @@ button:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #fdefff;
+  background: W#fdefff77;
   border-radius: 50px;
   opacity: 0;
   transition: all 0.15s ease;
@@ -181,16 +182,16 @@ button:hover {
 
 .button-wrapper:hover .layer-1 {
   opacity: 1;
-  animation: glitchLayer1 0.4s steps(2) infinite;
+  animation: glitchLayer1 0.8s steps(2) infinite;
 }
 
 .button-wrapper:hover .layer-2 {
   opacity: 1;
-  animation: glitchLayer2 0.4s steps(2) infinite;
+  animation: glitchLayer2 0.8s steps(2) infinite;
 }
 
 .button-wrapper:hover .spiderverse-button {
-  animation: buttonGlitch 0.3s steps(2) infinite;
+  animation: buttonGlitch 0.5s steps(2) infinite;
   box-shadow:
     0 0 20px rgba(225, 0, 255, 0.5),
     0 0 30px rgba(255, 0, 221, 0.466),
@@ -206,7 +207,7 @@ button:hover {
   background: repeating-radial-gradient(
     circle at 50% 50%,
     transparent 0,
-    rgba(0, 0, 0, 0.1) 1px,
+    rgba(0, 0, 0, 0) 1px,
     transparent 2px
   );
   pointer-events: none;
@@ -323,7 +324,7 @@ button:hover {
   position: absolute;
   width: 120%;
   height: 5px;
-  background: #ffffff;
+  background: #ffffff7e;
   opacity: 0;
   animation: slice 3s linear infinite;
 }
