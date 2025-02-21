@@ -71,7 +71,7 @@ function spawnEnemies() {
         } while (distance < minSpawnDistance + player.radius + 500);
 
         // Add variation to enemy size and calculate speed based on radius
-        const sizeVariation = (Math.random() < 0.5 ? 1 : 1) * (Math.random() * 10);
+        const sizeVariation = (Math.random() < 0.5 ? 1 : 1) * (Math.random() * 50);
         const enemyRadius = Math.max(10, player.radius + sizeVariation);
 
         enemies.push({
@@ -171,9 +171,11 @@ function checkCollisions() {
                 increaseScore(10);
                 updateZoom(); // Update zoom based on new size
             } else {
+                
                 // Game over if player collides with a larger enemy
-                alert(`Game Over! You survived ${round} rounds.`);
-                location.reload(); // Reload the game
+                // alert(`Game Over! You survived ${round} rounds.`);
+                delete player.speed;
+                gameOver();
             }
         }
     }
@@ -341,8 +343,24 @@ function gameLoop() {
     requestAnimationFrame(gameLoop);  // Call gameLoop again for the next frame
 }
 
+
+const restartButton = document.getElementById("restartButton");
+
+function gameOver() {
+    // Stop the game logic (pause animations, stop enemy movement, etc.)
+    clearInterval(gameLoop); // Example: stopping the main game loop
+    
+    // Show restart button
+    restartButton.style.display = "block";
+}
+
+restartButton.addEventListener("click", function () {
+    location.reload(); // Reloads the page to restart the game
+});
+
 // Start the game loop
 gameLoop();
+
 
 
 

@@ -126,3 +126,33 @@ button:hover {
     
 
 }
+
+#restartButton {
+    padding: 10px;
+    margin: 10px;
+    width: 30%;
+    height: 10%;
+    background: #3e046d;
+    border: none;
+    color: rgb(214, 188, 226);
+    font-size: 1.2em;
+    cursor: pointer;
+    border-radius: 20px;
+    transform: translate(-50%, -50%);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    display: none;
+}
+
+#restartButton:hover {
+
+        background: #972eb8;
+        box-shadow: 0 12px 16px rgba(0, 0, 0, 0.733), 0 17px 50px #c021a6;
+        color: rgb(255, 255, 255);
+        transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
