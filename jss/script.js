@@ -26,7 +26,8 @@ function getColors() {
         largeEnemyColor: rootStyles.getPropertyValue("--large-enemy-color").trim() || "rgb(255, 0, 0)",
         foodColor: rootStyles.getPropertyValue("--food-color").trim() || "rgb(255, 255, 255)",
         backgroundColor: rootStyles.getPropertyValue("--background-color").trim() || "rgb(0, 0, 0)",
-        
+        chargingColor1: rootStyles.getPropertyValue("--charging-color1").trim() || "rgb(255, 0, 0)", 
+        chargingColor2: rootStyles.getPropertyValue("--charging-color2").trim() || "rgb(0, 255, 0)"       
     };
 }
 
@@ -57,7 +58,6 @@ const enemyBatchSize = 20;  // Number of enemies to spawn in one batch
 // const minSpawnDistance = 500; // Minimum distance from player to spawn an enemy
 let round = 1;  // Round counter
 
-// Function to spawn enemies at random positions
 function spawnEnemies() {
     const minSpawnDistance = getMinSpawnDistance();
     for (let i = 0; i < enemyBatchSize; i++) {
@@ -74,14 +74,25 @@ function spawnEnemies() {
         const sizeVariation = (Math.random() < 0.5 ? 1 : 1) * (Math.random() * 50);
         const enemyRadius = Math.max(10, player.radius + sizeVariation);
 
+        const isSpecialEnemy = Math.random() < 0.2; // 10% chance to spawn a special enemy
+
         enemies.push({
             x: enemyX,
             y: enemyY,
             radius: enemyRadius,
-            speed: 3 + Math.random()
+            speed: 3 + Math.random(),
+            isSpecial: isSpecialEnemy,
+            charging: false,
+            chargeTime: 3,
+            chargeDirection: { x: 0, y: 0 }
         });
     }
 }
+
+
+
+
+
 
 // Spawn initial enemies
 spawnEnemies();
@@ -119,13 +130,45 @@ function moveEnemies() {
         const dy = player.y - enemy.y;
         const distance = Math.sqrt(dx * dx + dy * dy);
 
-        // Enemies move towards the player based on relative size
-        if (player.radius > enemy.radius || skillActive) {
-            enemy.x -= (dx / distance) * enemy.speed;
-            enemy.y -= (dy / distance) * enemy.speed;
-        } else if (player.radius < enemy.radius) {
-            enemy.x += (dx / distance) * enemy.speed;
-            enemy.y += (dy / distance) * enemy.speed;
+        if (enemy.isSpecial) {
+            if (!enemy.charging && !enemy.chargingCooldown) {
+                // Stop for 3 seconds before charging
+                enemy.chargingCooldown = true;
+                setTimeout(() => {
+                    enemy.chargingCooldown = false;
+                    enemy.charging = true;
+                    enemy.chargeDirection = { x: dx / distance, y: dy / distance };
+                }, 3000);
+            }
+
+            if (enemy.charging) {
+                // Charge at a constant speed
+                const chargeSpeed = 7; // Adjust charging speed as needed
+                enemy.x += enemy.chargeDirection.x * chargeSpeed;
+                enemy.y += enemy.chargeDirection.y * chargeSpeed;
+
+                // Flash color during charging
+                enemy.chargingColor = enemy.chargingColor === getColors().chargingColor1 ? getColors().chargingColor2 : getColors().chargingColor1;
+
+                // Stop charging if close to the player
+                if (distance < 10) {
+                    enemy.charging = false;
+                }
+            } else if (!enemy.chargingCooldown) {
+                // Move at a constant speed even if bigger
+                const specialSpeed = 3; // Adjust normal movement speed as needed
+                enemy.x += (dx / distance) * specialSpeed;
+                enemy.y += (dy / distance) * specialSpeed;
+            }
+        } else {
+            // Normal enemies' movement depends on size
+            if (player.radius > enemy.radius || skillActive) {
+                enemy.x -= (dx / distance) * enemy.speed;
+                enemy.y -= (dy / distance) * enemy.speed;
+            } else if (player.radius < enemy.radius) {
+                enemy.x += (dx / distance) * enemy.speed;
+                enemy.y += (dy / distance) * enemy.speed;
+            }
         }
 
         // Prevent enemies from going out of bounds
@@ -133,6 +176,7 @@ function moveEnemies() {
         enemy.y = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.y));
     }
 }
+
 
 function increaseScore(amount) {
     score += amount;
@@ -322,7 +366,11 @@ function draw() {
 
     // Draw enemies
     enemies.forEach(enemy => {
-        ctx.fillStyle = player.radius < enemy.radius ? getColors().largeEnemyColor : getColors().enemyColor;
+        if (enemy.charging) {
+            ctx.fillStyle = enemy.chargingColor || getColors().chargingColor1;
+        } else {
+            ctx.fillStyle = player.radius < enemy.radius ? getColors().largeEnemyColor : getColors().enemyColor;
+        }
         ctx.beginPath();
         ctx.arc(enemy.x, enemy.y, enemy.radius, 0, Math.PI * 2);
         ctx.fill();

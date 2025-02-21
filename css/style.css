@@ -7,6 +7,8 @@
     --food-color: rgb(25, 214, 88);
     --background-color: rgb(12, 1, 26);
     --obstacle-color: rgb(126, 162, 184);
+    --charging-color1: rgb(196, 1, 255);
+    --charging-color2: rgb(255, 255, 255);
 }
 
 * {
