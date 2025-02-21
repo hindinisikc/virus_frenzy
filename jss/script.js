@@ -131,37 +131,40 @@ function moveEnemies() {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (enemy.isSpecial) {
-            if (!enemy.charging && !enemy.chargingCooldown) {
-                // Stop for 3 seconds before charging
-                enemy.chargingCooldown = true;
+            if (!enemy.charging && !enemy.stopped) {
+                // Stop moving for 3 seconds
+                enemy.stopped = true;
                 setTimeout(() => {
-                    enemy.chargingCooldown = false;
+                    enemy.stopped = false;
                     enemy.charging = true;
-                    enemy.chargeDirection = { x: dx / distance, y: dy / distance };
-                }, 3000);
+                }, 3000); // 3 seconds stop time
             }
 
             if (enemy.charging) {
-                // Charge at a constant speed
-                const chargeSpeed = 7; // Adjust charging speed as needed
-                enemy.x += enemy.chargeDirection.x * chargeSpeed;
-                enemy.y += enemy.chargeDirection.y * chargeSpeed;
-
-                // Flash color during charging
-                enemy.chargingColor = enemy.chargingColor === getColors().chargingColor1 ? getColors().chargingColor2 : getColors().chargingColor1;
-
-                // Stop charging if close to the player
-                if (distance < 10) {
+                // Change color to indicate charging phase
+                enemy.chargingColor = enemy.chargingColor === getColors().chargingColor1 
+                    ? getColors().chargingColor2 
+                    : getColors().chargingColor1;
+                
+                setTimeout(() => {
+                    enemy.chargeDirection = { x: dx / distance, y: dy / distance };
+                    enemy.dashing = true;
                     enemy.charging = false;
-                }
-            } else if (!enemy.chargingCooldown) {
-                // Move at a constant speed even if bigger
-                const specialSpeed = 3; // Adjust normal movement speed as needed
-                enemy.x += (dx / distance) * specialSpeed;
-                enemy.y += (dy / distance) * specialSpeed;
+                }, 2000); // 2 seconds charging phase
+            }
+
+            if (enemy.dashing) {
+                // Fast dash movement towards the player
+                enemy.x += enemy.chargeDirection.x * 20;
+                enemy.y += enemy.chargeDirection.y * 20;
+                
+                // Stop dashing after a short burst
+                setTimeout(() => {
+                    enemy.dashing = false;
+                }, 500);
             }
         } else {
-            // Normal enemies' movement depends on size
+            // Regular enemy movement
             if (player.radius > enemy.radius || skillActive) {
                 enemy.x -= (dx / distance) * enemy.speed;
                 enemy.y -= (dy / distance) * enemy.speed;
