@@ -3,6 +3,8 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+
+
 // Set canvas size to match the window size
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
@@ -81,6 +83,7 @@ function getColors() {
 }
 
 // Player object containing player properties and methods
+
 const player = {
     x: mapSize / 2,     // Initial X position (center of the map)
     y: mapSize / 2,     // Initial Y position (center of the map)
