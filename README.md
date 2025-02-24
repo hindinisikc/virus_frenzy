@@ -53,13 +53,9 @@ The game is built using JavaScript and the HTML5 Canvas API. Key components:
 ## Installation & Running
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/virus-frenzy.git
+   git clone https://github.com/hindinisikc/virus_frenzy.git
    ```
 2. Open `index.html` in a web browser to play.
 
-## Credits
-Developed by [Your Name].
 
-## License
-This project is open-source under the [MIT License](LICENSE).
 
