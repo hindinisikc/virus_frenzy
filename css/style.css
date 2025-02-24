@@ -42,7 +42,7 @@ canvas {
     transform: translate(-50%);
     display: flex;
     gap: 20px;
-    display: none;
+    /* display: none; */
 
 }
 
@@ -86,7 +86,7 @@ button p{
 
 #speed-Card {
     background: rgba(0, 4, 255, 0.37);
-    border: solid 1px rgb(136, 135, 243);
+    border: solid 1px rgb(171, 185, 248);
     border-radius: 10px;
 }
 
@@ -102,7 +102,7 @@ button p{
 
 
 button #super-h{
-    color: rgb(235, 50, 50);
+    color: rgb(248, 12, 12);
 }
 
 button #super-p{
@@ -110,7 +110,7 @@ button #super-p{
 }
 
 button:hover {
-    background: rgba(255, 255, 255, 0.733);
+    background: rgba(255, 255, 255, 0.911);
     box-shadow: 0 12px 16px rgba(255, 255, 255, 0.527), 0 17px 50px rgba(255, 255, 255, 0.19);
     transition: background 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }

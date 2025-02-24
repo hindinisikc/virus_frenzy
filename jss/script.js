@@ -85,7 +85,7 @@ const player = {
     x: mapSize / 2,     // Initial X position (center of the map)
     y: mapSize / 2,     // Initial Y position (center of the map)
     radius: 30,         // Initial player size
-    baseSpeed: 5,       // Base speed of the player
+    baseSpeed: 7,       // Base speed of the player
     get speed() {       // Dynamic speed based on player's size (radius)
         return this.baseSpeed + (this.radius / 50);
     }
@@ -93,7 +93,7 @@ const player = {
 
 // Update zoom level based on player's radius
 function updateZoom() {
-    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 300); // Zoom decreases as player grows
+    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 1000); // Zoom decreases as player grows
 }
 
 // Function to calculate minimum spawn distance based on map size
@@ -103,7 +103,7 @@ function getMinSpawnDistance() {
 
 // Enemies array and related constants
 const enemies = [];
-const enemyBatchSize = 20;  // Number of enemies to spawn in one batch
+const enemyBatchSize = 15;  // Number of enemies to spawn in one batch
 // const minSpawnDistance = 500; // Minimum distance from player to spawn an enemy
 let round = 1;  // Round counter
 
@@ -123,20 +123,30 @@ function spawnEnemies() {
         const sizeVariation = (Math.random() < 0.5 ? 1 : 1) * (Math.random() * 50);
         const enemyRadius = Math.max(10, player.radius + sizeVariation);
 
-        const isSpecialEnemy = Math.random() < 0.2; // 10% chance to spawn a special enemy
+        let isSpecialEnemy = false;
+
+        // Only allow special charging enemies to spawn when round >= 3
+        if (round >= 2) {
+            isSpecialEnemy = Math.random() < 0.2; // 20% chance for special enemies
+        }
 
         enemies.push({
             x: enemyX,
             y: enemyY,
             radius: enemyRadius,
-            speed: 3 + Math.random(),
+            speed: 5 + Math.random(),
             isSpecial: isSpecialEnemy,
             charging: false,
+            stopped: false,
+            dashing: false,
             chargeTime: 3,
             chargeDirection: { x: 0, y: 0 }
         });
     }
 }
+
+
+
 
 
 
@@ -180,46 +190,45 @@ function moveEnemies() {
         const distance = Math.sqrt(dx * dx + dy * dy);
 
         if (enemy.isSpecial) {
-            if (!enemy.charging && !enemy.stopped) {
-                // Stop moving for 3 seconds
+            // --- Charging Enemy Logic ---
+            if (!enemy.charging && !enemy.stopped && !enemy.dashing) {
+                // Stop moving for 3 seconds before charging
                 enemy.stopped = true;
                 setTimeout(() => {
                     enemy.stopped = false;
                     enemy.charging = true;
-                }, 3000); // 3 seconds stop time
+                }, 3000);
             }
 
-            if (enemy.charging) {
-                // Change color to indicate charging phase
+            if (enemy.charging && !enemy.dashing) {
+                // Start charging for 2 seconds (indicates preparation)
                 enemy.chargingColor = enemy.chargingColor === getColors().chargingColor1 
                     ? getColors().chargingColor2 
                     : getColors().chargingColor1;
-                
+
                 setTimeout(() => {
                     enemy.chargeDirection = { x: dx / distance, y: dy / distance };
                     enemy.dashing = true;
                     enemy.charging = false;
-                }, 2000); // 2 seconds charging phase
+                }, 2000);
             }
 
             if (enemy.dashing) {
-                // Fast dash movement towards the player
-                enemy.x += enemy.chargeDirection.x * 20;
-                enemy.y += enemy.chargeDirection.y * 20;
-                
+                // Dashing towards the player at high speed
+                enemy.x += enemy.chargeDirection.x * 60;
+                enemy.y += enemy.chargeDirection.y * 60;
+
                 // Stop dashing after a short burst
                 setTimeout(() => {
                     enemy.dashing = false;
                 }, 500);
             }
         } else {
-            // Regular enemy movement
-            if (player.radius > enemy.radius || skillActive) {
-                enemy.x -= (dx / distance) * enemy.speed;
-                enemy.y -= (dy / distance) * enemy.speed;
-            } else if (player.radius < enemy.radius) {
-                enemy.x += (dx / distance) * enemy.speed;
-                enemy.y += (dy / distance) * enemy.speed;
+            // --- Normal Enemy Logic ---
+            if (!enemy.stopped && !enemy.dashing) {
+                const speedMultiplier = player.radius > enemy.radius || skillActive ? -1 : 1;
+                enemy.x += (dx / distance) * enemy.speed * speedMultiplier;
+                enemy.y += (dy / distance) * enemy.speed * speedMultiplier;
             }
         }
 
@@ -228,6 +237,9 @@ function moveEnemies() {
         enemy.y = Math.max(enemy.radius, Math.min(mapSize - enemy.radius, enemy.y));
     }
 }
+
+
+
 
 
 function increaseScore(amount) {
@@ -286,7 +298,7 @@ function checkCollisions() {
                 if (distSq < radiiSq) {
                     if (player.radius > enemy.radius || skillActive) {
                         enemies.splice(i, 1);
-                        player.radius += 5;
+                        player.radius += 2;
                         increaseScore(10);
                         updateZoom();
                     } else {
@@ -316,7 +328,7 @@ let nextRoundTriggered = false;
 // Function to start a new round
 function startNewRound() {
     round++;
-    mapSize += 3000;  // Increase map size for the next round
+    mapSize += 1000;  // Increase map size for the next round
     player.x = mapSize / 2;  // Recenter player
     player.y = mapSize / 2;
     updateZoom();  // Update zoom
