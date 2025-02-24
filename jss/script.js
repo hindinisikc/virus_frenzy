@@ -7,15 +7,64 @@ const ctx = canvas.getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const offscreenCanvas = document.createElement("canvas");
+const offscreenCtx = offscreenCanvas.getContext("2d");
+
+offscreenCanvas.width = canvas.width;
+offscreenCanvas.height = canvas.height;
+
+// Draw grid once on offscreen canvas
+offscreenCtx.fillStyle = "#000";
+offscreenCtx.fillRect(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+offscreenCtx.strokeStyle = "#444";
+for (let x = 0; x < canvas.width; x += 50) {
+    offscreenCtx.moveTo(x, 0);
+    offscreenCtx.lineTo(x, canvas.height);
+}
+for (let y = 0; y < canvas.height; y += 50) {
+    offscreenCtx.moveTo(0, y);
+    offscreenCtx.lineTo(canvas.width, y);
+}
+offscreenCtx.stroke();
+
+
 let mapSize = 2000; // Size of the game map
 let zoomLevel = 1;  // Initial zoom level
 
 let skillActive = false; // Flag to check if skill is active
 let skillCooldown = false; // Flag to check if skill is on cooldown
 
+const cellSize = 50;  // Adjust based on object size
+let spatialHash = {}; // Stores objects by grid cell
 
 let score = 0;
 const scoreElement = document.getElementById("score");
+
+function addToSpatialHash(obj) {
+    let cellX = Math.floor(obj.x / cellSize);
+    let cellY = Math.floor(obj.y / cellSize);
+    let key = `${cellX},${cellY}`;
+    
+    if (!spatialHash[key]) spatialHash[key] = [];
+    spatialHash[key].push(obj);
+}
+
+function getNearbyObjects(obj) {
+    let cellX = Math.floor(obj.x / cellSize);
+    let cellY = Math.floor(obj.y / cellSize);
+    let nearbyObjects = [];
+
+    // Check surrounding 3x3 cells
+    for (let x = -1; x <= 1; x++) {
+        for (let y = -1; y <= 1; y++) {
+            let key = `${cellX + x},${cellY + y}`;
+            if (spatialHash[key]) {
+                nearbyObjects.push(...spatialHash[key]);
+            }
+        }
+    }
+    return nearbyObjects;
+}
 
 // Function to retrieve color values from CSS variables
 function getColors() {
@@ -193,36 +242,59 @@ function onEnemyEaten() {
 
 // Function to check for collisions between the player, food, and enemies
 function checkCollisions() {
-    // Check collisions with food
+
+    spatialHash = {};  // Reset spatial hash each frame
+
+    // Add foods & enemies to spatial hash
+    foods.forEach(addToSpatialHash);
+    enemies.forEach(addToSpatialHash);
+
+     // Check food collisions (only nearby objects)
     for (let i = foods.length - 1; i >= 0; i--) {
         const food = foods[i];
-        const dist = Math.sqrt((food.x - player.x) ** 2 + (food.y - player.y) ** 2);
-        if (dist < player.radius) {
-            foods.splice(i, 1); // Remove food item
-            player.radius += 1; // Increase player size
-            increaseScore(1);
-            updateZoom(); // Update zoom based on new size
+        let nearbyObjects = getNearbyObjects(player);
+
+        for (let obj of nearbyObjects) {
+            if (obj === food) {  // Ensure checking only food
+                const dx = food.x - player.x;
+                const dy = food.y - player.y;
+                const distSq = dx * dx + dy * dy;
+                
+                if (distSq < player.radius * player.radius) {
+                    foods.splice(i, 1);
+                    player.radius += 1;
+                    increaseScore(1);
+                    updateZoom();
+                    break;  // Stop checking once a collision is found
+                }
+            }
         }
     }
 
-    // Check collisions with enemies
+    // Check enemy collisions (only nearby objects)
     for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
-        const dist = Math.sqrt((enemy.x - player.x) ** 2 + (enemy.y - player.y) ** 2);
+        let nearbyObjects = getNearbyObjects(player);
 
-        // Player eats the enemy if it collides with a smaller enemy
-        if (dist < player.radius + enemy.radius) {
-            if (player.radius > enemy.radius || skillActive) {
-                enemies.splice(i, 1); // Remove enemy
-                player.radius += 5; // Increase player size
-                increaseScore(10);
-                updateZoom(); // Update zoom based on new size
-            } else {
-                
-                // Game over if player collides with a larger enemy
-                // alert(`Game Over! You survived ${round} rounds.`);
-                delete player.speed;
-                gameOver();
+        for (let obj of nearbyObjects) {
+            if (obj === enemy) {  // Ensure checking only enemies
+                const dx = enemy.x - player.x;
+                const dy = enemy.y - player.y;
+                const distSq = dx * dx + dy * dy;
+                const radiiSq = (player.radius + enemy.radius) ** 2;
+
+                if (distSq < radiiSq) {
+                    if (player.radius > enemy.radius || skillActive) {
+                        enemies.splice(i, 1);
+                        player.radius += 5;
+                        increaseScore(10);
+                        updateZoom();
+                    } else {
+                        delete player.speed;
+                        gameOver();
+                    }
+                    break;  // Stop checking once a collision is found
+                }
             }
         }
     }
@@ -350,6 +422,7 @@ function update() {
 // Draw everything to the canvas
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
+    ctx.drawImage(offscreenCanvas, 0, 0);
     ctx.fillStyle = getColors().backgroundColor;  // Set background color
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
