@@ -3,7 +3,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+const playerElement = document.getElementById("player");
 
+let gameRunning = true;
 
 // Set canvas size to match the window size
 canvas.width = window.innerWidth;
@@ -85,20 +87,52 @@ function getColors() {
 // Player object containing player properties and methods
 
 const player = {
-    x: mapSize / 2,     // Initial X position (center of the map)
-    y: mapSize / 2,     // Initial Y position (center of the map)
-    radius: 30,         // Initial player size
-    baseSpeed: 7,       // Base speed of the player
-    get speed() {       // Dynamic speed based on player's size (radius)
+    x: canvas.width / 2,  // Center of the screen
+    y: canvas.height / 2, // Center of the screen
+    radius: 30, // Initial radius
+    baseSpeed: 7,
+    get speed() {
         return this.baseSpeed + (this.radius / 50);
-    }
+    },
+    element: playerElement
 };
+
+// Function to update player size based on radius
+function updatePlayerSize() {
+    player.element.style.width = `${player.radius * 2}px`;
+    player.element.style.height = `${player.radius * 2}px`;
+
+    // Update glitch layers
+    const glitchLayers = document.querySelectorAll(".glitch-layer");
+    glitchLayers.forEach(layer => {
+        layer.style.width = `${player.radius * 2}px`;
+        layer.style.height = `${player.radius * 2}px`;
+    });
+}
+
+
+// Function to smoothly increase player size
+function updatePlayerSizeSmoothly(targetRadius) {
+    let growthSpeed = 0.3; // Increase speed for faster updates
+    if (Math.abs(targetRadius - player.radius) < 1) {
+        player.radius = targetRadius; // Directly apply if close enough
+    } else {
+        player.radius += (targetRadius - player.radius) * growthSpeed;
+    }
+    updatePlayerSize();
+}
+
+
+// Initial size update
+updatePlayerSize();
 
 // Update zoom level based on player's radius
 function updateZoom() {
-    zoomLevel = 1 - Math.min(0.8, (player.radius - 30) / 1000); // Zoom decreases as player grows
+    let targetZoom = 1 - Math.min(0.8, (player.radius - 30) / 300);
+    
+    // Smoothly interpolate zoom level
+    zoomLevel += (targetZoom - zoomLevel) * 0.1; 
 }
-
 // Function to calculate minimum spawn distance based on map size
 function getMinSpawnDistance() {
     return mapSize / 4; // Example: enemies spawn at least 1/4th of the map size away from the player
@@ -147,11 +181,6 @@ function spawnEnemies() {
         });
     }
 }
-
-
-
-
-
 
 
 
@@ -257,71 +286,42 @@ function onEnemyEaten() {
 
 // Function to check for collisions between the player, food, and enemies
 function checkCollisions() {
-
-    spatialHash = {};  // Reset spatial hash each frame
-
-    // Add foods & enemies to spatial hash
-    foods.forEach(addToSpatialHash);
-    enemies.forEach(addToSpatialHash);
-
-     // Check food collisions (only nearby objects)
+    // Check food collisions
     for (let i = foods.length - 1; i >= 0; i--) {
         const food = foods[i];
-        let nearbyObjects = getNearbyObjects(player);
+        const dx = food.x - player.x;
+        const dy = food.y - player.y;
+        const distSq = dx * dx + dy * dy;
 
-        for (let obj of nearbyObjects) {
-            if (obj === food) {  // Ensure checking only food
-                const dx = food.x - player.x;
-                const dy = food.y - player.y;
-                const distSq = dx * dx + dy * dy;
-                
-                if (distSq < player.radius * player.radius) {
-                    foods.splice(i, 1);
-                    player.radius += 1;
-                    increaseScore(1);
-                    updateZoom();
-                    break;  // Stop checking once a collision is found
-                }
-            }
+        if (distSq < (player.radius * player.radius)) { 
+            foods.splice(i, 1);
+            updatePlayerSizeSmoothly(player.radius + 4); 
+            increaseScore(1);
+            break;
         }
     }
 
-    // Check enemy collisions (only nearby objects)
+    // Check enemy collisions
     for (let i = enemies.length - 1; i >= 0; i--) {
         const enemy = enemies[i];
-        let nearbyObjects = getNearbyObjects(player);
+        const dx = enemy.x - player.x;
+        const dy = enemy.y - player.y;
+        const distSq = dx * dx + dy * dy;
+        const radiiSq = (player.radius + enemy.radius) ** 2;  // Adjust with zoom
 
-        for (let obj of nearbyObjects) {
-            if (obj === enemy) {  // Ensure checking only enemies
-                const dx = enemy.x - player.x;
-                const dy = enemy.y - player.y;
-                const distSq = dx * dx + dy * dy;
-                const radiiSq = (player.radius + enemy.radius) ** 2;
-
-                if (distSq < radiiSq) {
-                    if (player.radius > enemy.radius || skillActive) {
-                        enemies.splice(i, 1);
-                        player.radius += 2;
-                        increaseScore(10);
-                        updateZoom();
-                    } else {
-                        delete player.speed;
-                        gameOver();
-                    }
-                    break;  // Stop checking once a collision is found
-                }
+        if (distSq < radiiSq) { 
+            if (player.radius > enemy.radius || skillActive) {
+                enemies.splice(i, 1);
+                updatePlayerSizeSmoothly(player.radius + 8);
+                increaseScore(10);
+            } else {
+                gameOver();
             }
+            break;
         }
     }
-
-    // Start new round if all enemies are eliminated
-    if (enemies.length === 0 && !nextRoundTriggered) {
-        nextRoundTriggered = true;
-        setTimeout(startNewRound, 500);  // Delay before starting the new round
-    }
-
-    
 }
+
 
 
 
@@ -412,6 +412,7 @@ function activateSkill() {
 
 // Update the player and enemy movements
 function update() {
+    if (!gameRunning) return; // Stop updating if the player is dead
     // Move the player based on keys pressed
     if (keysPressed['w'] || keysPressed['W']) {
         player.y -= player.speed;
@@ -430,21 +431,42 @@ function update() {
     player.x = Math.max(player.radius, Math.min(mapSize - player.radius, player.x));
     player.y = Math.max(player.radius, Math.min(mapSize - player.radius, player.y));
 
+    // Calculate the player's screen position
+    const screenX = (canvas.width / 2) - (player.x * zoomLevel);
+    const screenY = (canvas.height / 2) - (player.y * zoomLevel);
+
+    // Update the HTML player element's position
+    player.element.style.left = `${canvas.width / 2}px`;
+    player.element.style.top = `${canvas.height / 2}px`;
+
+    // **Check if all enemies are dead and transition to the next round**
+    if (enemies.length === 0 && !nextRoundTriggered) {
+        nextRoundTriggered = true; // Prevent multiple triggers
+        setTimeout(startNewRound, 2000); // Delay before starting the new round
+    }
+
     moveEnemies(); // Move the enemies
     checkCollisions(); // Check for collisions
+    updateZoom(); // Update zoom level
 }
 
 // Draw everything to the canvas
 function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
-    ctx.drawImage(offscreenCanvas, 0, 0);
     ctx.fillStyle = getColors().backgroundColor;  // Set background color
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Apply zoom and translation to the canvas
     ctx.save();
-    ctx.translate(canvas.width / 2 - player.x * zoomLevel, canvas.height / 2 - player.y * zoomLevel);  // Adjust for zoom and player position
-    ctx.scale(zoomLevel, zoomLevel);  // Apply zoom level
-    drawGrid();  // Draw the grid
+    // Smoothly transition the translation
+    let smoothX = (canvas.width / 2) - (player.x * zoomLevel);
+    let smoothY = (canvas.height / 2) - (player.y * zoomLevel);
+
+    ctx.translate(smoothX, smoothY);
+    ctx.scale(zoomLevel, zoomLevel);
+
+    // Draw the grid
+    drawGrid();
 
     // Draw food items
     foods.forEach(food => {
@@ -453,7 +475,6 @@ function draw() {
         ctx.arc(food.x, food.y, food.radius, 0, Math.PI * 2);
         ctx.fill();
     });
-
 
     // Draw enemies
     enemies.forEach(enemy => {
@@ -467,16 +488,14 @@ function draw() {
         ctx.fill();
     });
 
-    // Draw the player
-    ctx.fillStyle = getColors().playerColor;
-    ctx.beginPath();
-    ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
-    ctx.fill();
+    // Restore the canvas state
     ctx.restore();
 }
 
 // Main game loop
 function gameLoop() {
+    if (!gameRunning) return; // Stop the loop if the game is over
+
     update();  // Update game logic
     draw();    // Draw game objects
     requestAnimationFrame(gameLoop);  // Call gameLoop again for the next frame
@@ -486,12 +505,14 @@ function gameLoop() {
 const restartButton = document.getElementById("restartButton");
 
 function gameOver() {
-    // Stop the game logic (pause animations, stop enemy movement, etc.)
-    clearInterval(gameLoop); // Example: stopping the main game loop
+    gameRunning = false; // Stop game loop updates
+    // Hide the player element
+    player.element.style.display = "none";
     
     // Show restart button
     restartButton.style.display = "block";
 }
+
 
 restartButton.addEventListener("click", function () {
     location.reload(); // Reloads the page to restart the game
@@ -500,8 +521,6 @@ restartButton.addEventListener("click", function () {
 // Start the game loop
 gameLoop();
 
-
-
-
-
-
+console.log("Player position (game logic):", player.x, player.y);
+console.log("Player element position (CSS):", player.element.style.left, player.element.style.top);
+console.log("Zoom level:", zoomLevel);

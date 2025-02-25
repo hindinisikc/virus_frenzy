@@ -9,7 +9,10 @@
     --obstacle-color: rgb(126, 162, 184);
     --charging-color1: rgb(196, 1, 255);
     --charging-color2: rgb(255, 255, 255);
+    
 }
+
+
 
 * {
     font-family: Arial;
@@ -27,7 +30,26 @@ div {
 }
 
 canvas {
-    display: block;
+  display: block;
+  width: 100vw; /* Full viewport width */
+  height: 100vh; /* Full viewport height */
+}
+
+#player {
+  position: absolute; /* Required for manual positioning */
+  width: 60px; /* Initial size */
+  height: 60px;
+  background-color: var(--player-color);
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+  transition: all 0.2s ease;
+  transform-origin: center; /* Ensure scaling happens from the center */
+  z-index: 1000; /* Ensure the player is above other elements */
+
+  /* Center the player initially */
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%); /* Center the player */
 }
 
 .noCursor {
