@@ -348,4 +348,34 @@ button:hover {
   }
 }
 
+.controls-container {
+  margin-top: 20px;
+  text-align: center;
+  color: #ffc6ff;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 64px;
+  
+  
+}
 
+.controls-title {
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: rgba(25, 25, 26, 0.212);
+  border: 2px solid rgba(241, 204, 240, 0.507);
+  
+}
+
+.control-row {
+  font-size: 1.2em;
+  letter-spacing: 8px;
+}
