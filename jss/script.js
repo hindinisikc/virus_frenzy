@@ -11,6 +11,14 @@ let gameRunning = true;
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+window.addEventListener("resize", () => {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    offscreenCanvas.width = canvas.width;
+    offscreenCanvas.height = canvas.height;
+});
+
+
 const offscreenCanvas = document.createElement("canvas");
 const offscreenCtx = offscreenCanvas.getContext("2d");
 
@@ -120,6 +128,17 @@ function updatePlayerSizeSmoothly(targetRadius) {
         player.radius += (targetRadius - player.radius) * growthSpeed;
     }
     updatePlayerSize();
+
+    // Immediately update the player visual size
+    player.element.style.width = `${player.radius * 2}px`;
+    player.element.style.height = `${player.radius * 2}px`;
+
+    // Update glitch layers
+    const glitchLayers = document.querySelectorAll(".glitch-layer");
+    glitchLayers.forEach(layer => {
+        layer.style.width = `${player.radius * 2}px`;
+        layer.style.height = `${player.radius * 2}px`;
+    });
 }
 
 
@@ -242,7 +261,7 @@ function moveEnemies() {
                     enemy.chargeDirection = { x: dx / distance, y: dy / distance };
                     enemy.dashing = true;
                     enemy.charging = false;
-                }, 2000);
+                }, 1000);
             }
 
             if (enemy.dashing) {
@@ -295,7 +314,7 @@ function checkCollisions() {
 
         if (distSq < (player.radius * player.radius)) { 
             foods.splice(i, 1);
-            updatePlayerSizeSmoothly(player.radius + 4); 
+            updatePlayerSizeSmoothly(player.radius + 2); 
             increaseScore(1);
             break;
         }
@@ -307,12 +326,12 @@ function checkCollisions() {
         const dx = enemy.x - player.x;
         const dy = enemy.y - player.y;
         const distSq = dx * dx + dy * dy;
-        const radiiSq = (player.radius + enemy.radius) ** 2;  // Adjust with zoom
+        const radiiSq = (player.radius + enemy.radius) ** 2;
 
         if (distSq < radiiSq) { 
             if (player.radius > enemy.radius || skillActive) {
                 enemies.splice(i, 1);
-                updatePlayerSizeSmoothly(player.radius + 8);
+                updatePlayerSizeSmoothly(player.radius + 6);
                 increaseScore(10);
             } else {
                 gameOver();
@@ -321,6 +340,7 @@ function checkCollisions() {
         }
     }
 }
+
 
 
 
